@@ -9,7 +9,12 @@ class StudentInfo:
     def preprocess_teacher_name(cls, tn):
         # Ms. Erica garl -> garl
         ptn = tn.split(" ")[-1].lower()
-        ptn_splits = ptn.replace(".", " ").split(" ")
+        ptn_splits = [x.strip() for x in ptn.replace(".", " ").split(" ") if x.strip()]
+        if len(ptn_splits) == 0:
+            return "unknown"
+        elif len(ptn_splits) == 1:
+            return ptn_splits[0]
+
         # Ms.Garl -> garl (no space after .)
         if not ptn_splits[-1].strip():
             return ptn_splits[-2]
