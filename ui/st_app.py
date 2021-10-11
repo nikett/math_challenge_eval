@@ -5,8 +5,7 @@ from prettytable import PrettyTable
 import sys
 from src import leaderboard
 sys.path.append('.')
-sys.path.append('..')
-
+sys.path.append('../src')
 
 def upload_file(file_desc: str, out_path: str):
     '''
