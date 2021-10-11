@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 import streamlit as st
 from prettytable import PrettyTable
@@ -43,11 +44,13 @@ def to_markdown_table(pt: PrettyTable):
     return "\n".join(markdown)
 
 def main():
-    st.write("Leaderboard\n")
+    st.write("Math Challenge Leaderboard\n")
+    temp_dir = tempfile.mkdtemp()
+    
     with st.form('form_leaderboard'):
-        out_path_correct_ans = os.path.join("data/uploaded", f"temp_correct_answers.csv")
+        out_path_correct_ans = os.path.join(temp_dir, f"temp_correct_answers.csv")
         upload_file(file_desc="correct answers csv", out_path=out_path_correct_ans)
-        out_path_student_ans = os.path.join("data/uploaded", f"temp_student_answers.csv")
+        out_path_student_ans = os.path.join(temp_dir, f"temp_student_answers.csv")
         upload_file(file_desc="student answers csv", out_path=out_path_student_ans)
         submitted = st.form_submit_button("Generate Leaderboard")
         if submitted:
