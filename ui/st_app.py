@@ -2,7 +2,7 @@ import os
 
 import streamlit as st
 from prettytable import PrettyTable
-
+import sys
 from src import leaderboard
 sys.path.append('.')
 sys.path.append('..')
