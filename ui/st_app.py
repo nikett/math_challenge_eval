@@ -3,9 +3,10 @@ import os
 import streamlit as st
 from prettytable import PrettyTable
 import sys
-from src import leaderboard
+
 sys.path.append('.')
-sys.path.append('../src')
+sys.path.append('..')
+from src import leaderboard
 
 def upload_file(file_desc: str, out_path: str):
     '''
