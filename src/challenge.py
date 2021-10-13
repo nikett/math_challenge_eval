@@ -6,6 +6,21 @@ from src.student_info import StudentInfo
 
 DEFAULT_EMPTY_ANS=-1000000  # if an answer cannot be parsed as an int (e.g., two ducklings or ducklings)
 
+
+def remove_if_exists(sd, target_challenge_name, student):
+    # Timestamps are implicitly represented in the entry order because google sheets appends a new entry at the end.
+    # assert not any([x for x in sd[challenge.student] if x.challenge_name == challenge.challenge_name]), f"Repeated entry by the following challenge submission:\n{challenge}"
+
+    #  input = MC1, MC2, MC3, MC4, MC4, MC5, MC6 , check_if_repeated_entry = MC4
+    #  output = MC1, MC2, MC3, MC4, MC5, MC6
+    all_submissions_by_student = sd[student]  # MC1, MC2, MC3, MC4, MC4, MC5, MC6
+    unrepeated_entry = []
+    for submission in all_submissions_by_student:  # iterate over all challenge submissions of this student
+        if submission.challenge_name != target_challenge_name:
+            unrepeated_entry.append(submission)
+    sd[student] = unrepeated_entry  # update the master dictionary of student -> list of submissions by removing the duplicate entries.
+
+
 class Challenge:
     def __init__(self, student: "StudentInfo", answers:List[str], challenge_name: str, is_student_resp: bool):
         # TODO: reject a late submission (based on its timestamp, and a deadline dict)
@@ -45,6 +60,7 @@ class Challenge:
                                                is_student_resp=False)
         return alls
 
+    # TODO set expiration deadlines for challenges.
     @classmethod
     def load_student_answers(cls, fp) -> Dict["StudentInfo", List["Challenge"]]:
         sd: Dict[StudentInfo, List["Challenge"]] = {}
@@ -56,6 +72,6 @@ class Challenge:
                 challenge = Challenge(student=student, answers=correct_answers, challenge_name=challenge_nm, is_student_resp=True)
                 if challenge.student not in sd:
                     sd[challenge.student] = []
-                assert not any([x for x in sd[challenge.student] if x.challenge_name == challenge.challenge_name]), f"Repeated entry by the following challenge submission:\n{challenge}"
+                remove_if_exists(sd=sd, target_challenge_name=challenge.challenge_name, student=challenge.student)
                 sd[challenge.student].append(challenge)
         return sd

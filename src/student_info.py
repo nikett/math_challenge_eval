@@ -1,3 +1,6 @@
+from src.utils import abbreviate_lname
+
+
 class StudentInfo:
     def __init__(self, f_name:str,l_name:str,grade:str,teacher:str):
         self.f_name = str.capitalize(f_name.lower())
@@ -21,6 +24,9 @@ class StudentInfo:
         else:  # Erica G. -> g
             return ptn_splits[-1]
 
+    def get_formal_abbreviated_name(self):
+        return f"{self.f_name} {abbreviate_lname(lname=self.l_name)}".strip()
+
     def __hash__(self):
         return hash((self.f_name, self.l_name, self.grade, self.teacher))
 
@@ -28,4 +34,4 @@ class StudentInfo:
         return (self.f_name, self.l_name, self.grade, self.teacher) == (other.f_name, other.l_name, other.grade, other.teacher)
 
     def __repr__(self):
-        return f"{self.grade}, Ms. {self.teacher}: {self.f_name} {self.l_name}"
+        return f"{self.get_formal_abbreviated_name()}, {self.grade}: Ms. {self.teacher}: {self.f_name} {self.l_name}"

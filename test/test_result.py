@@ -30,7 +30,7 @@ class TestChallenge(unittest.TestCase):
         r1.passed = True
         r1.num_correct = 3
         r1.num_wrong = 4 - 3
-        self.assertEqual(Result.score(student_ans, gold_ans).__repr__(), r1.__repr__())
+        self.assertEqual(Result.result(student_ans, gold_ans).__repr__(), r1.__repr__())
 
     def test_create_leaderboard(self):
         r1 = Result()

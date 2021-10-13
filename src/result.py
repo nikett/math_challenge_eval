@@ -12,7 +12,7 @@ class Result:
         self.num_wrong: int = 0
 
     @classmethod
-    def score(cls, student_ans: Challenge, correct_ans: Challenge) -> "Result":
+    def result(cls, student_ans: Challenge, correct_ans: Challenge) -> "Result":
         assert student_ans.is_student_resp, f"Did not pass the right student response:\n{student_ans}"
         assert not correct_ans.is_student_resp, f"Did not pass the right correct response:\n{correct_ans}"
         assert len(student_ans.answers) == len(correct_ans.answers), f"Student challenge and correct challenge number of answers mismatch, cannot compare:\nstudent response: {student_ans}\ncorrect response: {correct_ans}.\n"
@@ -55,9 +55,11 @@ class Result:
             for challenge in challenges_list:
                 if challenge.student not in student_scores:
                     student_scores[student] = []
-                student_scores[student].append(
-                    Result.score(student_ans=challenge,correct_ans=correct_challenges_dict[challenge.challenge_name])
-                )
+                # if we do not have correct answers for MC5, then ignore this student entry.
+                if challenge.challenge_name in correct_challenges_dict:
+                    student_scores[student].append(
+                        Result.result(student_ans=challenge, correct_ans=correct_challenges_dict[challenge.challenge_name])
+                    )
         return student_scores
 
     def __repr__(self):
