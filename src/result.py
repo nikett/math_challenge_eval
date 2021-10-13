@@ -33,10 +33,10 @@ class Result:
         gradewise_threshold = {
             "Kindergarten": 3,
             "First grade": 3,
-            "Second grade": 5,
-            "Third grade": 5,
-            "Fourth grade": 7,
-            "Fifth grade": 7
+            "Second grade": 7,
+            "Third grade": 7,
+            "Fourth grade": 12,
+            "Fifth grade": 12
         }
         return num_correct >= gradewise_threshold[grade]
 
