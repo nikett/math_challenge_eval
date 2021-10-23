@@ -1,5 +1,6 @@
 import unittest
 
+from src import leaderboard
 from src.challenge import Challenge
 from src.result import Result
 from src.student_info import StudentInfo
@@ -57,6 +58,12 @@ class TestChallenge(unittest.TestCase):
         leaderboard = Result.create_leaderboard(student_scores=student_scores)
         self.assertEqual(leaderboard[2][0], top3_student)
         self.assertEqual(leaderboard[0][0], top1_student)
+
+    # def test_create_leaderboard_from_file(self):
+    #     p =leaderboard.main(correct_answers_fp="data/bug/bugfix_correct_ans.csv",
+    #                         # student_answers_fp="data/bug/bugfix_user_resp.csv"
+    #                         student_answers_fp="data/bug/all-resp-until-mc2.csv"
+    #                         )
 
 
 if __name__ == '__main__':

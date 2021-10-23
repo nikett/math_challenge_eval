@@ -3,14 +3,15 @@ from src.utils import abbreviate_lname
 
 class StudentInfo:
     def __init__(self, f_name:str,l_name:str,grade:str,teacher:str):
-        self.f_name = str.capitalize(f_name.lower())
-        self.l_name = str.capitalize(l_name.lower())
+        self.f_name = str.capitalize(f_name.lower().strip())
+        self.l_name = str.capitalize(l_name.lower().strip())
         self.grade = grade
-        self.teacher = str.capitalize(self.preprocess_teacher_name(teacher))
+        self.teacher = str.capitalize(self.preprocess_teacher_name(teacher.strip()))
 
     @classmethod
     def preprocess_teacher_name(cls, tn):
         # Ms. Erica garl -> garl
+        tn = tn.strip()
         ptn = tn.split(" ")[-1].lower()
         ptn_splits = [x.strip() for x in ptn.replace(".", " ").split(" ") if x.strip()]
         if len(ptn_splits) == 0:
