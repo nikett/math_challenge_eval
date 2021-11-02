@@ -33,7 +33,11 @@ def main():
                                                         judges=split_csv(judges_csv),
                                                         form_action=form_action
                                                         )
-            st.write(f"{judges_platform_cnt} new forms (referenced in the index.html) are stored at the local directory: {out_dir}")
+            index_html_url = f"file://{out_dir}/index.html"
+            st.write(f"{judges_platform_cnt} new forms (referenced in the index.html) "
+                     f"are stored at the local directory: {out_dir}. \n\nmain web page is at {index_html_url}")
+
+            # st.write(f"[click here to see the generated file]({index_html_url})")
 
 
 if __name__ == '__main__':
