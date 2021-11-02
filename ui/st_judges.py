@@ -14,7 +14,7 @@ from src import judges_platform
 
 def main():
     st.write("Reflections judges_platform\n")
-    temp_dir = "/tmp/st_judges/"
+    temp_dir = "/tmp/"
     
     with st.form('form_judges_platform'):
         data_entries_fp = os.path.join(temp_dir, f"data_entries.csv")
