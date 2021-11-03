@@ -21,7 +21,7 @@ def main():
         upload_file(file_desc="data entries file (csv)", out_path=data_entries_fp, st=st)
         website_base_addr = st.text_input('Where will the forms be hosted', '')
         judges_csv = st.text_input('First names of judges (comma separated)', 'Dhivya, Shweta, Thom, Trisha, Whitney')
-        form_action = st.text_input('Web app from Google sheets (scripts editor)', 'https://script.google.com/macros/s/AKfycbxM03CgaCSU5PsWahgEa6RLpPZXIm8mhDMEPofdkDJ-1iLjZCv1HiJxr_BU3NlunTYJoQ/exec')
+        form_action = st.text_input('Web app from Google sheets (scripts editor)', 'https://script.google.com/macros/s/AKfycbyi-42Psz_6118nWOeQNqSL_nXu4VejtnWVtuzH1U5P92w8IZTEXGKdtbmtXyi53ZJR8w/exec')
         submitted = st.form_submit_button("Generate judges_platform")
 
         if submitted:

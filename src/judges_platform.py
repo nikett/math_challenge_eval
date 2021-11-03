@@ -33,7 +33,7 @@ def fill_overall_template(form_arr, entry_ids, judges):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
-  background-color: pink;
+  background-color: white;
 }
 .button {
         display: inline-block;
@@ -49,20 +49,12 @@ body {
 </head>
 <body>
 <div>
-<h3> Welcome judges. Please evaluate your entries. <br><br>
+<h3> Welcome judges! Please evaluate your entries.</h3> <br><br>
 </div>
-<div id="refresh_status" style="background-color:yellow; width:140px;">
-    Updating entries...
-</div><br>
 '''
     # body = '<p id="http://www.shrikrishnajewels.com/compile/kirtans/1/1.mp3">Kirtan 1: and its <a href="forms/form1.html">link is this</a> </p>'
     rows = []  # for every row, there is an array.
     newline= "\n"
-    max_in_one_col = 3
-    max_kirtans_in_one_col = 20
-    curr_tr_closed = False
-
-    # TODO check if we can access an html page in a google drive.
 
     # table at main/index.html
     # entry id -- judge1, judge2, judge3, judge4, judge5
@@ -72,19 +64,19 @@ body {
 
     # can make this less hardcoded.
     headers = ["Entry","..."]
-    for judge in judges:
-        headers.append(f"Judge {str.capitalize(judge)}")
+    # for judge in judges:
+    #     headers.append(f"Judge {str.capitalize(judge)}")
 
     rows.append(f"<tr>{newline.join(['<th>' + x + '</th>' + newline for x in headers])}</tr>\n")
     for form_full_path, entry_id in zip(form_arr, entry_ids):
         rows.append(f'<tr>')
-        rows.append(f'\n\t<td id=f"entry_{entry_id}"> <a href="{form_full_path}">Entry {entry_id}</a></td>')
-        rows.append(f'\n\t<td id=f"dummy_{entry_id}">  </td>')
-        for judge in judges:
-            rows.append(f'\n\t<td id=f"judge_{judge.lower()}_{entry_id}"> x </td>')
+        rows.append(f'\n\t<td id="entry_{entry_id}"> <a href="{form_full_path}">Entry {entry_id}</a></td>')
+        rows.append(f'\n\t<td id="dummy_{entry_id}">  </td>')
+        # for judge in judges:
+        #     rows.append(f'\n\t<td id=f"judge_{judge.lower()}_{entry_id}"> x </td>')
         rows.append('</tr>')
 
-    body = '\n<table style=\"border:2px solid blue;border-collapse:collapse; \">' + '\n'.join(rows) + '\n</table>'
+    body = '\n<table style=\"border:2px solid blue; padding: 10px 20px; \">' + '\n'.join(rows) + '\n</table>'
     tail='''
 </body>
 </html>
@@ -98,15 +90,23 @@ def img_and_other_elems(file_types, urls):
     # <a href="url" target="_blank"> original link</a>
     for file_type, url in zip(file_types, urls):
         if file_type == "jpg":
-            # perhaps: create thumbnail from url
+            # perhaps: create thumbnail from url (because original art does not load)
             # https://drive.google.com/file/d/14hz3ySPn-zB
             # https://drive.google.com/thumbnail?id=14hz3ySPn-zB
-            arr.append(f'<img src="{url}" width="500" height="600">')
-            arr.append(f'<a href="{url}" target="_blank">Original image link</a>')
-        # TODO handle other file types mp3, mp4, pdf etc.
-        # elif file_type == "mp3":
-        #     arr.append(f'<audio src={url} width="500" height="600">')
-        #     arr.append(f'<a href={url}>Original image link</a>')
+            url_thumbnail = url.replace("https://drive.google.com/file/d/", "https://drive.google.com/thumbnail?id=")
+            url_thumbnail = url_thumbnail.replace("https://drive.google.com/open?", "https://drive.google.com/thumbnail?")
+            arr.append(f'<img src="{url_thumbnail}" width="500" height="600">')
+            arr.append(f'<a href="{url}" target="_blank">Original image high resolution</a>')
+        elif file_type == "mp3":
+            arr.append(f'<audio controls>\n<source src="{url}" type="audio/mpeg">\n</audio>')
+            arr.append(f'<a href={url}>Original audio link</a>')
+        elif file_type == "mp4":
+            arr.append(f'<video controls>\n<source src="{url}" type="video/mp4">\n</video>')
+            arr.append(f'<a href={url}>Original video link</a>')
+        elif file_type == "pdf":
+            arr.append(f'<a href={url}>Original PDF link</a>')
+        elif file_type == "docx":
+            arr.append(f'<a href={url}>Original docx link</a>')
         else:
             arr.append(f'<a href="{url}" target="_blank">Original link (file type: {file_type})</a>')
 
@@ -131,7 +131,41 @@ def fill_form_template(form_action: str, data: Dict[str, Any]):
         background-color: #2196F3;
         border-radius: 6px;
         outline: none;
-}
+    }
+    .div_sixty_pc{
+       width: 60%;
+    }
+    table{
+        table-layout: fixed;
+        width: 90%;
+    }
+    .half_ul{
+        width: 60%;
+    }
+    body{
+        padding-left: 1px;
+        padding-right: 1px;
+        margin: 20px;
+    }
+
+    input, select, checkbox {
+         width: 45%;
+         border:solid 2px #2196F3;
+         background-color: white;
+         color: black;
+         float: left;
+         box-sizing: border-box;
+         -webkit-box-sizing:border-box;
+         -moz-box-sizing: border-box;
+    }
+    .half_p{
+        width: 50%;
+    }
+
+    td {
+        width: 40%;
+    }
+
 </style>
 </head>
 ''' + f'''
@@ -140,11 +174,26 @@ def fill_form_template(form_action: str, data: Dict[str, Any]):
 <body>
 <p><br/>
 </p>
-<div class="w3-container">
-    <div class="w3-container w3-blue">
-        <h5>Entry # {data['entry_id']}  &rarr;  ({data['entry_category']})</h5>
-    </div><br>
+
+<div align="center">
+    <h2><b>Scoring form for Judges</b></h2>
+
+    <h3><b><i>2021-22 theme: “I Will Change The World By...” </i></b></h3>
+    <br>
+
+    <div align="left">
+    Scoring: All PTA Reflections program entries are judged on three criteria: <br>
+    1. Interpretation of Theme (40 pts.) <br>
+    2. Creativity (30 pts.)<br>
+    3. Technique (30 pts.)<br>
+
+    2021-22 Judges guide is <a href="https://www.wastatepta.org/wp-content/uploads/2021/08/21-22-Judges-guide.pdf"
+                               style="color: #0000FF">here</a>
+    </div>
+
 </div>
+
+
 <form action="{form_action}" class="w3-container" method="GET">
     <input id="entry_student_first_name" name="entry_student_first_name" value="{data['entry_student_first_name']}" type="hidden" readonly/><br/>
     <input id="entry_student_last_name" name="entry_student_last_name" value="{data['entry_student_last_name']}" type="hidden" readonly/><br/>
@@ -159,47 +208,139 @@ def fill_form_template(form_action: str, data: Dict[str, Any]):
     <input id="judge_secret" name="judge_secret" value="dummy" type="hidden" readonly/>
     
     <div class="w3-card-4">
+        <div class="w3-container w3-blue div_sixty_pc">
+            <h5>Entry # {data['entry_id']}  &rarr;  ({data['entry_category']})</h5>
+        </div>
+    
+        <p class="half_p"> <b>Title</b>: {data['entry_title']} </p>
+        <p class="half_p"> <b>Statement</b>: {data['entry_statement']} </p>
+    
         {img_and_other_elems(file_types=split_csv(data['entry_file_types']), urls=split_csv(data['entry_urls']))}
         
-        <p> Caption: {data['entry_statement']}
-        </p>
         
+        <br><br>
+        <div class="w3-container w3-blue div_sixty_pc">
+
+            <h6>Interpretation - How closely the piece relates to the theme, based on the work itself and the artist
+                statement.</h6>
+        </div>
+        <ul class="half_ul">
+            <li>Beginning - 1-8 pts. - The interpretation lacks clarity and does not communicate the student’s
+                concept.
+            </li>
+            <li>Developing - 9-16 pts. - The interpretation lacks clarity and does not fully communicate the student’s
+                concept based on the theme.
+            </li>
+            <li>Proficient - 17-24 pts. - The interpretation communicates the student’s concept based on the theme.</li>
+            <li>Accomplished - 25-32 pts. - The interpretation clearly communicates the student’s concept based on the
+                theme but lacks meaning, purpose, and integrity.
+            </li>
+            <li>Advanced - 33-40 pts. - The interpretation clearly communicates the student's whole concept based on the
+                theme with meaning, purpose and integrity.
+            </li>
+        </ul>
+
+
         <table>
             <tr>
-                <td><label for="judge_name">Your name</label></td>
-                <td><input placeholder="" id="judge_name" name="judge_name" type="text" required/></td>
+                <td> &#9989; Enter score for "Interpretation"</td>
+                <td>
+                    <input id="interpretation" name="interpretation" placeholder="" required type="text"/>
+                </td>
             </tr>
-            
+
+
             <tr>
-                <td><label for="interpretation">Interpretation</label></td>
-                <td><input placeholder="" id="interpretation" name="interpretation" type="text" required/></td>
+                <td><label for="interpretation_comments"> &#9989; Your comments/notes on "Interpretation of the topic" </label>
+                </td>
+                <td><input id="interpretation_comments" name="interpretation_comments" placeholder="" type="text"/></td>
             </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+
+        </table>
+
+
+        <div class="w3-container w3-blue div_sixty_pc"><h6>Creativity - How creative and original the piece is in its conception of
+                                              the theme and its presentation. </h6></div>
+        <br>
+
+        <ul class="half_ul">
+            <li>Beginning - 1-6 pts. - Work is somewhat original and reflects the theme using very conventional ways.
+            </li>
+            <li>Developing - 7-12 pts. - Work is somewhat original and reflects the theme using conventional ways.</li>
+            <li>Proficient - 13-18 pts. - Work is original and reflects the theme using conventional ways.</li>
+            <li>Accomplished - 19-24 pts. - Work is primarily original and reflects the theme using imaginative ways.
+            </li>
+            <li>Advanced - 25-30 pts. - Work is highly original and reflects the theme using un-conventional,
+                interesting, imaginative and new ways.
+            </li>
+        </ul>
+
+        <table>
             <tr>
-                <td><label for="interpretation_comments">Interpretation comments</label></td>
-                <td><input placeholder="" id="interpretation_comments" name="interpretation_comments" type="text"/></td>
+                <td> &#9989; Enter score for "Creativity"</td>
+                <td><input id="creativity" name="creativity" placeholder="" required type="text"/></td>
             </tr>
-            
+
             <tr>
-                <td><label for="creativity">creativity</label></td>
-                <td><input placeholder="" id="creativity" name="creativity" type="text" required/></td>
+                <td><label for="creativity_comments"> &#9989; Your comments/notes on "Creativity"</label></td>
+                <td><input id="creativity_comments" name="creativity_comments" placeholder="" type="text"/></td>
             </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+        </table>
+
+
+        <div class="w3-container w3-blue div_sixty_pc">
+            <h6>Technique - The level of skill demonstrated in the basic principles/ techniques of the arts area. </h6>
+        </div>
+        <br>
+
+
+        <ul class="half_ul">
+            <li>Beginning - 1-6 pts. - Work demonstrates very limited skill of the arts area.</li>
+            <li>Developing - 7-12 pts. - Work demonstrates limited skill of the arts area.</li>
+            <li>Proficient - 13-18 pts. - Work demonstrates capable skill of the arts area.</li>
+            <li>Accomplished - 19-24 pts. - Work demonstrates expertise of skill of the arts area.</li>
+            <li>Advanced - 25-30 pts. - Work demonstrates mastery of skill and knowledge of the arts area.</li>
+        </ul>
+
+        <table>
             <tr>
-                <td><label for="creativity_comments">creativity comments</label></td>
-                <td><input placeholder="" id="creativity_comments" name="creativity_comments" type="text"/></td>
+                <td> &#9989; Enter score for "Technique"</td>
+                <td><input id="technique" name="technique" placeholder="" required type="text"/></td>
             </tr>
-            
+
             <tr>
-                <td><label for="technique">technique</label></td>
-                <td><input placeholder="" id="technique" name="technique" type="text"/></td>
+                <td><label for="technique_comments"> &#9989; Your comments/notes on "Technique"</label></td>
+                <td><input id="technique_comments" name="technique_comments" placeholder="" type="text"/></td>
             </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+        </table>
+
+        <div class="w3-container w3-blue div_sixty_pc">
+            <h6>Other questions. </h6>
+        </div>
+        <br>
+
+        <table>
             <tr>
-                <td><label for="technique_comments">technique comments</label></td>
-                <td><input placeholder="" id="technique_comments" name="technique_comments" type="text"/></td>
+                    <td><label for="judge_name"> &#9989; Judge's first name</label></td>
+                    <td><input id="judge_name" name="judge_name" placeholder="" required type="text"/></td>
             </tr>
-            
+
             <tr>
-                <td><label for="confidence">Confidence</label></td>
-                <td><select id="confidence" name="confidence">
+                <td><label for="confidence"> &#9989; Your confidence in this evaluation</label></td>
+                <td><select id="confidence" name="confidence" required>
+                    <option value="Select confidence" selected>-</option>
                     <option value="Not confident">Not confident</option>
                     <option value="Sort of confident">Sort of confident</option>
                     <option value="Very confident">Very confident</option>
@@ -207,20 +348,29 @@ def fill_form_template(form_action: str, data: Dict[str, Any]):
             </tr>
 
             <tr>
-                <td><hr /></td>
-                <td><hr /></td>
+                <td><label for="coi"> &#9989; Is there any conflict of interest? Please check if any.</label></td>
+                <td><input id="coi" name="coi" placeholder="" type="checkbox" value="yes"/></td>
             </tr>
 
             <tr>
-                <td><label for="other_comments"> Other comments </label></td>
-                <td><input placeholder="" id="other_comments" name="other_comments" type="text"/></td>
+                <td><label for="other_comments"> &#9989;  Other comments if any</label></td>
+                <td><input id="other_comments" name="other_comments" placeholder="" type="text"/></td>
             </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+            <tr></tr>
+
         </table>
     </div>
-    
-    </div><br>
+
+    <br>
     <div style="text-align: center;">
-        <input class="button" type="submit" value="Submit""/>
+        <input class="button" type="submit" value="Submit"/>
     </div>
 </form>
 </body>
@@ -251,6 +401,8 @@ def rename_dict_keys(d):
     d["entry_grade"] = d["Grade"]
     d["entry_parent_email_id"] = d["Email Address"]
     d["entry_file_types"] = d["file_type"]
+    d["entry_title"] = d["Title of artwork"]
+    d["entry_is_valid"] = d["is_valid_final_entry"]
     return d
 
 
@@ -265,6 +417,9 @@ def load_data_to_forms(fp, out_dir, form_action, website_base_addr, judges):
             id_ = d["id"]
             fname = f'{id_}.html'
             rename_dict_keys(d)
+            if d["entry_is_valid"] == "0":
+                print(f"Skipping {id_} because entry_is_valid = {d['entry_is_valid']}")
+                continue
             form_path_local = os.path.join(out_dir, fname)
             html_form_content = fill_form_template(form_action=form_action, data=d)
             save_to_file(content=html_form_content, out_fp=form_path_local)
@@ -285,7 +440,7 @@ def main(data_entries_fp: str, out_dir: str, judges: List[str], website_base_add
     :param out_dir: "data/forms"
     :param judges: ["Dhivya", "Shweta", "Thom", "Trisha", "Whitney"]
     :param website_base_addr: "file://" # http://www.shrikrishnajewels.com/compile/forms
-    :param form_action: "https://script.google.com/macros/s/AKfycbxM03CgaCSU5PsWahgEa6RLpPZXIm8mhDMEPofdkDJ-1iLjZCv1HiJxr_BU3NlunTYJoQ/exec"
+    :param form_action: "https://script.google.com/macros/s/AKfycbyi-42Psz_6118nWOeQNqSL_nXu4VejtnWVtuzH1U5P92w8IZTEXGKdtbmtXyi53ZJR8w/exec"
     :return:
     """
     assert os.path.exists(data_entries_fp), f"\n\ndata entries (input csv) for judges does not exist: {data_entries_fp}"
@@ -300,6 +455,6 @@ if __name__ == '__main__':
     main(data_entries_fp= "data/judges_input/real-judges-data.csv",
          out_dir= "data/forms",
          judges =["Dhivya", "Shweta", "Thom", "Trisha", "Whitney"],
-         website_base_addr = "",
-         form_action="https://script.google.com/macros/s/AKfycbxM03CgaCSU5PsWahgEa6RLpPZXIm8mhDMEPofdkDJ-1iLjZCv1HiJxr_BU3NlunTYJoQ/exec"
+         website_base_addr = "https://shrikrishnajewels.com/reflections",
+         form_action="https://script.google.com/macros/s/AKfycbyi-42Psz_6118nWOeQNqSL_nXu4VejtnWVtuzH1U5P92w8IZTEXGKdtbmtXyi53ZJR8w/exec"
          )
