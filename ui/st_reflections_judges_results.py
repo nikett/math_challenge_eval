@@ -6,8 +6,6 @@ from typing import Dict
 import streamlit as st
 import sys
 
-from prettytable import PrettyTable
-
 from ui.utils import upload_file, to_markdown_table
 
 sys.path.append('.')
@@ -36,6 +34,7 @@ def main():
         temp_dir = st.text_input('Directory where the result will be saved', temp_dir)
         min_num_judges_per_entry: int = st.number_input('min judges per entry', min_value=1, max_value=7, step=1, value=3)
         ignore_coi = st.checkbox('ignore conflict of interest?')
+        reveal_score_in_report = st.checkbox('reveal score in judge completion report?')
         judges_expertise= json.loads(st.text_area('Enter judge and expertise in json format', json.dumps(sample_judges_expertise)))
         st.json(judges_expertise)
 
@@ -46,15 +45,19 @@ def main():
         submitted = st.form_submit_button("Generate judges results")
         if submitted:
             st.write(f"\n{'*'*80}\n\nReflections results")
-            p: PrettyTable = reflections_result.main(judges_scores_fp=uploaded_judges_scoring_fp,
+            (results, report) = reflections_result.main(judges_scores_fp=uploaded_judges_scoring_fp,
                                                      ignore_coi=ignore_coi,
                                                      min_num_judges_per_entry=min_num_judges_per_entry,
-                                                     judges_expertise=judges_expertise
+                                                     judges_expertise=judges_expertise,
+                                                     reveal_score_in_report=reveal_score_in_report
                                                      )
-            st.write(to_markdown_table(p))
+            st.write(to_markdown_table(results))
             st.write(f"\n{'*'*80}\n\nResults stored at: {output_path}.")
             with open(output_path, 'w') as outfile:
-                outfile.write(f"{p}")
+                outfile.write(f"{results}")
+
+            st.write(f"\n\n{'*'*80}\n\n Report:")
+            st.write(to_markdown_table(report))
 
 
 if __name__ == '__main__':

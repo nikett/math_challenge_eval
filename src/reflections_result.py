@@ -71,6 +71,7 @@ class ReflectionsEntry:
         self.judges_scores = []
         for j in judges_scores:
             self.add_judge_score(j)
+        self.judges_score_dict: Dict[str, ReflectionsJudgeScore] = {x.judge.judge_name:x.unweighted_score for x in judges_scores}
         self.urls = entry_urls
         self.file_types = entry_file_types
         self.category = entry_category
@@ -85,6 +86,7 @@ class ReflectionsEntry:
         for idx in duplicate_indices:
             self.judges_scores.pop(idx)
         self.judges_scores.append(judge_score)
+        self.judges_score_dict[judge_score.judge.judge_name] = judge_score
 
     def __hash__(self):
         return hash(self.entry_id)
@@ -171,29 +173,50 @@ def create_entries(judges_scores_fp: str, judges_expertise: Dict[str, str]) -> L
         entries.append(entry)
     return entries
 
-def main(judges_scores_fp: str, judges_expertise: Dict[str, str], ignore_coi: bool, min_num_judges_per_entry:int) -> PrettyTable:
-    judges_expertise = {k.lower(): v for k,v in judges_expertise.items()}
+
+def create_report_for_judges(reflections_entries, judges_expertise, reveal_score:bool):
+    names_of_judges = sorted(list(judges_expertise.keys()))
+    entry_dict = {x.entry_id: x for x in reflections_entries}
+    entry_ids = sorted([r.entry_id for r in reflections_entries])
+    p = PrettyTable()
+    p.field_names = ["entry_id", "category", *names_of_judges, "urls"]
+    p.sortby = "entry_id"
+    p.sort_key = lambda x: int(x[0])
+    for entry_id in entry_ids:
+        entry = entry_dict[entry_id]
+        judges_completed = ['x' if n not in entry.judges_score_dict else (entry.judges_score_dict[n].unweighted_score if reveal_score else u'\u2713') for n in names_of_judges]
+        p.add_row([entry_id, entry.category, *judges_completed, entry.urls])
+    return p
+
+
+def main(judges_scores_fp: str, judges_expertise: Dict[str, str], ignore_coi: bool, min_num_judges_per_entry:int, reveal_score_in_report: bool) -> (PrettyTable, PrettyTable):
+    judges_expertise = {k.lower(): v for k, v in judges_expertise.items()}
     assert os.path.exists(judges_scores_fp), f"Check judges scores file path: {judges_scores_fp}"
     reflections_entries = create_entries(judges_scores_fp=judges_scores_fp, judges_expertise=judges_expertise)
+    entries_report: PrettyTable = create_report_for_judges(reflections_entries=reflections_entries, judges_expertise= judges_expertise, reveal_score=reveal_score_in_report)
     reflections_results = [ReflectionsResult(entry=entry, ignore_coi=ignore_coi, min_num_judges_per_entry=min_num_judges_per_entry) for entry in reflections_entries]
-    return ReflectionsResult.mk_pretty_table(reflections_results)
+    return ReflectionsResult.mk_pretty_table(reflections_results), entries_report
 
 
-# if __name__ == '__main__':
-#     # Visual Arts
-#     # Music composition
-#     # Literature
-#     # Film/Video
-#     # Photography
-#     sample_judges_expertise: Dict[str, str] = {
-#         "shweta": "Visual Arts",
-#         "whitney": "Music composition",
-#         "thom": "Literature",
-#         "trisha": "",
-#         "dhivya priya v": ""
-#     }
-#     main(judges_scores_fp="data/judges_output/scores-submission-v2-data.csv",
-#          judges_expertise=sample_judges_expertise,
-#          min_num_judges_per_entry=3,
-#          ignore_coi=False
-#          )
+if __name__ == '__main__':
+    # Visual Arts
+    # Music composition
+    # Literature
+    # Film/Video
+    # Photography
+    sample_judges_expertise: Dict[str, str] = {
+        "shweta": "Visual Arts",
+        "whitney": "Music composition",
+        "thom": "Literature",
+        "trisha": "",
+        "dhivya priya v": ""
+    }
+    results, report = main(judges_scores_fp="data/judges_output/scores-submission-v2-data.csv",
+         judges_expertise=sample_judges_expertise,
+         min_num_judges_per_entry=3,
+         ignore_coi=False,
+         reveal_score_in_report=False
+         )
+    print(results)
+    print(f"\n\n{'*'*80}\n")
+    print(report)
