@@ -1,6 +1,6 @@
 import unittest
 
-from src import math_leaderboard
+from src import math_challenge_leaderboard
 from src.math_challenge import Challenge
 from src.math_challenge_result import MathChallengeResult
 from src.student_info import StudentInfo

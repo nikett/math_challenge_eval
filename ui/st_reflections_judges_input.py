@@ -23,6 +23,7 @@ def main():
         form_action = st.text_input('Web app from Google sheets (scripts editor)', 'https://script.google.com/macros/s/AKfycbyi-42Psz_6118nWOeQNqSL_nXu4VejtnWVtuzH1U5P92w8IZTEXGKdtbmtXyi53ZJR8w/exec')
         temp_dir = st.text_input('Path where the output html files will be stored', temp_dir)
         uploaded_data_entries_fp = os.path.join(temp_dir, f"data_entries.csv")
+        st.write("Hint: to upload data for entries download as csv : https://docs.google.com/spreadsheets/d/1mRHPLXsvQI_TGLOOrnmO2m9ieQobasoIleBoFyl7ET0/edit#gid=0")
         upload_file(file_desc="data entries file (csv)", out_path=uploaded_data_entries_fp, st=st)
         submitted = st.form_submit_button("Generate judges_platform")
 

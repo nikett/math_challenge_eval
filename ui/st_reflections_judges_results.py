@@ -40,6 +40,7 @@ def main():
         st.json(judges_expertise)
 
         uploaded_judges_scoring_fp = os.path.join(temp_dir, f"judge_scores.csv")
+        st.write("Hint: for judges scoring file csv download: https://docs.google.com/spreadsheets/d/1ZsCDH9OzNoAC4qagBwkpZdnDaKYOtBxFMR1hzbX_HYI/edit#gid=0")
         upload_file(file_desc="judges scoring file (csv)", out_path=uploaded_judges_scoring_fp, st=st)
         output_path = os.path.join(temp_dir, 'reflections.results.tsv')
         submitted = st.form_submit_button("Generate judges results")

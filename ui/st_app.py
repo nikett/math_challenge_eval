@@ -3,20 +3,20 @@ import sys
 sys.path.append('.')
 sys.path.append('..')
 
-from ui import st_judges_input, st_judges_output
+from ui import st_reflections_judges_input, st_reflections_judges_results
 
 import streamlit as st
 import sys
 
-import st_leaderboard
+import st_math_challenge_leaderboard
 
 
 sys.path.append(".")
 
 FUNCTIONALITIES = {
-    "Math challenge leaderboard": st_leaderboard,
-    "Reflections judges platform": st_judges_input,
-    "Reflections results": st_judges_output
+    "Math challenge leaderboard": st_math_challenge_leaderboard,
+    "Reflections judges platform": st_reflections_judges_input,
+    "Reflections results": st_reflections_judges_results
 }
 
 
