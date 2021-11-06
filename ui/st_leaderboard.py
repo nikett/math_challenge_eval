@@ -8,7 +8,7 @@ from ui.utils import upload_file, to_markdown_table
 
 sys.path.append('.')
 sys.path.append('..')
-from src import leaderboard
+from src import math_leaderboard
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
         submitted = st.form_submit_button("Generate Leaderboard")
         if submitted:
             st.write("Leaderboard:")
-            leaderboard_list = leaderboard.main(correct_answers_fp=out_path_correct_ans, student_answers_fp=out_path_student_ans)
+            leaderboard_list = math_leaderboard.main(correct_answers_fp=out_path_correct_ans, student_answers_fp=out_path_student_ans)
             st.write(to_markdown_table(leaderboard_list))
 
 

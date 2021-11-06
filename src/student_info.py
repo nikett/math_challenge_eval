@@ -2,7 +2,8 @@ from src.utils import abbreviate_lname
 
 
 class StudentInfo:
-    def __init__(self, f_name:str,l_name:str,grade:str,teacher:str):
+    def __init__(self, f_name:str,l_name:str,grade:str,teacher:str,email:str):
+        self.email = email
         self.f_name = str.capitalize(f_name.lower().strip())
         self.l_name = str.capitalize(l_name.lower().strip())
         self.grade = grade

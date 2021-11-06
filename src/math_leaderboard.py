@@ -6,24 +6,25 @@ from typing import Dict, List, Tuple
 
 from prettytable import PrettyTable
 
-from src.challenge import Challenge
-from src.result import Result
+from src.math_challenge import Challenge
+from src.math_challenge_result import MathChallengeResult
 from src.student_info import StudentInfo
 
 
-def main(correct_answers_fp, student_answers_fp):
+def main(correct_answers_fp, student_answers_fp) -> PrettyTable:
     correct_challenges_dict = Challenge.load_gold_answers(fp=correct_answers_fp)
     student_challenges_list_dict = Challenge.load_student_answers(fp=student_answers_fp)
-    student_scores = Result.compute_student_scores(correct_challenges_dict=correct_challenges_dict,
-                                                   student_list_challenges_dict=student_challenges_list_dict)
-    leaderboard: List[Tuple[StudentInfo, List["Result"]]] = Result.create_leaderboard(student_scores=student_scores)
+    student_scores = MathChallengeResult.compute_student_scores(correct_challenges_dict=correct_challenges_dict,
+                                                                student_list_challenges_dict=student_challenges_list_dict)
+    leaderboard: List[Tuple[StudentInfo, List[
+        "MathChallengeResult"]]] = MathChallengeResult.create_leaderboard(student_scores=student_scores)
 
     print(f"\n\nLeaderboard")
     p = PrettyTable()
     p.field_names = ["student name", "points", "grade", "student info", "ignore_this_minus_points", 'successful submissions', 'num correct']
     for (student, list_results) in leaderboard:
-        total_pass = Result.summarize(list_results)['total_num_passed']
-        total_correct = Result.summarize(list_results)['total_num_correct']
+        total_pass = MathChallengeResult.summarize(list_results)['total_num_passed']
+        total_correct = MathChallengeResult.summarize(list_results)['total_num_correct']
         p.add_row([student.get_formal_abbreviated_name(),  100* int(total_pass), student.grade, student.__repr__(), -100* int(total_pass), total_pass, total_correct])
     p.reversesort = False
     p.sortby = "ignore_this_minus_points"

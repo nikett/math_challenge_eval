@@ -22,14 +22,19 @@ def remove_if_exists(sd, target_challenge_name, student):
 
 
 class Challenge:
-    def __init__(self, student: "StudentInfo", answers:List[str], challenge_name: str, is_student_resp: bool):
+
+    def __init__(self, student: "StudentInfo", answers:List[str], challenge_name: str, is_student_resp: bool, split_ans_on = "__OR__"):
         # TODO: reject a late submission (based on its timestamp, and a deadline dict)
         self.is_student_resp = is_student_resp
         self.challenge_name = challenge_name
         self.answers: List[int] = []
         self.student = student
         for a in answers:
-            self.answers.append(self.preprocess_ans(a))
+            if split_ans_on in a:
+                a_s = [self.preprocess_ans(x) for x in a.split(split_ans_on)]
+                self.answers.append(a_s)
+            else:
+                self.answers.append(self.preprocess_ans(a))
 
     @classmethod
     def preprocess_ans(cls, a) -> int:
@@ -66,7 +71,7 @@ class Challenge:
         sd: Dict[StudentInfo, List["Challenge"]] = {}
         with open(fp) as f_handle:
             for d in csv.DictReader(f_handle):
-                student = StudentInfo(f_name=d['Student first name'], l_name=d['Student last name'], teacher=d["Teacher's name"], grade=d['Grade'])
+                student = StudentInfo(f_name=d['Student first name'], l_name=d['Student last name'], teacher=d["Teacher's name"], grade=d['Grade'], email=d['Username'])
                 challenge_nm = d['Math Challenge name']
                 correct_answers = [d[f"Question {x}"] for x in range(1, 19)]
                 challenge = Challenge(student=student, answers=correct_answers, challenge_name=challenge_nm, is_student_resp=True)

@@ -3,8 +3,7 @@ import sys
 sys.path.append('.')
 sys.path.append('..')
 
-from ui import st_judges
-
+from ui import st_judges_input, st_judges_output
 
 import streamlit as st
 import sys
@@ -16,7 +15,8 @@ sys.path.append(".")
 
 FUNCTIONALITIES = {
     "Math challenge leaderboard": st_leaderboard,
-    "Reflections judges platform": st_judges,
+    "Reflections judges platform": st_judges_input,
+    "Reflections results": st_judges_output
 }
 
 

@@ -1,7 +1,7 @@
 import unittest
 from typing import Dict, List
 
-from src.challenge import Challenge, DEFAULT_EMPTY_ANS
+from src.math_challenge import Challenge, DEFAULT_EMPTY_ANS
 from src.student_info import StudentInfo
 
 

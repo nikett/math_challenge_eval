@@ -25,7 +25,7 @@ from src.utils import ensure_path, save_to_file, split_csv
 
 
 # <body onload="parse_remote_csv()">
-def fill_overall_template(form_arr, entry_ids, judges):
+def fill_overall_template(form_arr, entry_ids, categories, grades, judges):
     head = ''' 
 <!DOCTYPE html>
 <html>
@@ -68,9 +68,9 @@ body {
     #     headers.append(f"Judge {str.capitalize(judge)}")
 
     rows.append(f"<tr>{newline.join(['<th>' + x + '</th>' + newline for x in headers])}</tr>\n")
-    for form_full_path, entry_id in zip(form_arr, entry_ids):
+    for form_full_path, entry_id, category, grade in zip(form_arr, entry_ids, categories, grades):
         rows.append(f'<tr>')
-        rows.append(f'\n\t<td id="entry_{entry_id}"> <a href="{form_full_path}">Entry {entry_id}</a></td>')
+        rows.append(f'\n\t<td id="entry_{entry_id}"> <a href="{form_full_path}">Entry {entry_id}  --  ({category}) -- {grade}</a></td>')
         rows.append(f'\n\t<td id="dummy_{entry_id}">  </td>')
         # for judge in judges:
         #     rows.append(f'\n\t<td id=f"judge_{judge.lower()}_{entry_id}"> x </td>')
@@ -209,7 +209,7 @@ def fill_form_template(form_action: str, data: Dict[str, Any]):
     
     <div class="w3-card-4">
         <div class="w3-container w3-blue div_sixty_pc">
-            <h5>Entry # {data['entry_id']}  &rarr;  ({data['entry_category']})</h5>
+            <h5>Entry # {data['entry_id']}  &rarr;  ({data['entry_category']})   &rarr;  {data['entry_grade']}</h5>
         </div>
     
         <p class="half_p"> <b>Title</b>: {data['entry_title']} </p>
@@ -413,6 +413,9 @@ def load_data_to_forms(fp, out_dir, form_action, website_base_addr, judges):
     with open(fp) as f_handle:
         form_online_paths_arr = []
         entry_id_arr = []
+        category_arr = []
+        grades_arr = []
+
         for d in csv.DictReader(f_handle):
             id_ = d["id"]
             fname = f'{id_}.html'
@@ -427,9 +430,16 @@ def load_data_to_forms(fp, out_dir, form_action, website_base_addr, judges):
             print(f"{form_path_online}'s form : {form_path_local}")
             form_online_paths_arr.append(form_path_online)
             entry_id_arr.append(id_)
+            grades_arr.append(d["entry_grade"])
+            category_arr.append(d["entry_category"])
             successful_forms += 1
         print(f"Saving index.html to {index_html}")
-        save_to_file(content=fill_overall_template(form_arr=form_online_paths_arr, entry_ids=entry_id_arr, judges=judges),
+        save_to_file(content=fill_overall_template(
+                                form_arr=form_online_paths_arr,
+                                entry_ids=entry_id_arr,
+                                categories=category_arr,
+                                grades=grades_arr,
+                                judges=judges),
                      out_fp=index_html)
         return successful_forms
 
