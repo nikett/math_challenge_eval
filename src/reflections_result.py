@@ -116,9 +116,8 @@ class ReflectionsResult:
         # Atleast one expert judge has scored. Make sure the judge has not marked it as a COI if we care about COIs.
         expert_looked_at_it = any([judge_score.judge.is_expert and (self.ignore_coi or not judge_score.is_coi) for judge_score in self.judges_scores])
         if not expert_looked_at_it:
-            expected_expert = [j for j in all_judges if j.expertise_in_category == self.entry.category]
-            if not expected_expert:
-                self.judges_yet_to_complete.extend(expected_expert or ["need_expert"])
+            expected_expert = [j for j in all_judges if j.expertise_in_category.lower() == self.entry.category.lower()]
+            self.judges_yet_to_complete.extend(expected_expert or ["need_expert"])
         sufficient_judges = len(self.judges_scores) >= self.min_num_judges_per_entry
         if not sufficient_judges:
             # get more general judges
