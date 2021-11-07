@@ -19,18 +19,22 @@ def main(correct_answers_fp, student_answers_fp, diagnostics_for_mc_challenge: s
     leaderboard: List[Tuple[StudentInfo, List["MathChallengeResult"]]] = MathChallengeResult.create_leaderboard(student_scores=student_scores)
 
 
-    diagnostics = ["", *correct_challenges_dict[diagnostics_for_mc_challenge].answers]
+    gold_ans = correct_challenges_dict[diagnostics_for_mc_challenge].answers
+    # diagnostics = ["", *gold_ans]
     tab = '\t'
     dp = PrettyTable()
-    dp.field_names = ["student name", *[f"ans.{(x+1)}" for x in range(18)]]
+    dp.field_names = ["student name", *[f"A{(x+1)}: {gold_ans[x]}" for x in range(18)]]
     dp.align['student name'] = 'l'
     for student_entry in leaderboard:
         student_info = student_entry[0]
-        challenge_result = [x.diagnostics for x in student_entry[1] if x.challenge_name == diagnostics_for_mc_challenge]
+        challenge_result = [(x.diagnostics, x.student_ans) for x in student_entry[1] if x.challenge_name == diagnostics_for_mc_challenge]
         challenge_result = challenge_result[0] if len(challenge_result) == 1 else None
         if challenge_result:
-            diagnostics.append(f"{student_info}\t{tab.join(challenge_result)}")
-            dp.add_row([student_info, *challenge_result])
+            diagnostics=[]
+            for judgment, pred in zip(challenge_result[0], challenge_result[1]):
+                diagnostics.append(f'{pred}: {judgment}')
+                # diagnostics.append(f"{student_info}\t{tab.join([f'{x[1]}: {x[0]}' for x in challenge_result])}")
+            dp.add_row([student_info, *diagnostics])
 
 
     print(f"\n\nLeaderboard")

@@ -11,6 +11,7 @@ class MathChallengeResult:
         self.num_correct: int = 0
         self.num_wrong: int = 0
         self.diagnostics: List[str] = []
+        self.student_ans: List[int] = []
         self.challenge_name = ""
 
     @classmethod
@@ -41,6 +42,7 @@ class MathChallengeResult:
 
         r.passed = r.passed_as_per_grade(num_correct=r.num_correct, grade=student_ans.student.grade)
         r.challenge_name = student_ans.challenge_name
+        r.student_ans = student_ans.answers
         return r
 
     @classmethod
