@@ -21,6 +21,9 @@ class ReflectionsJudge:
     def __eq__(self, other: "ReflectionsJudge"):
         return self.judge_name == other.judge_name
 
+    def __repr__(self):
+        return f"{self.judge_name} {('(' + self.expertise_in_category + ')' if self.expertise_in_category else '').strip()}"
+
 class ReflectionsJudgeScore:
     def __init__(self, judge: ReflectionsJudge, csv_entry_dict: Dict[str, Any]):
         self.judge = judge
@@ -68,7 +71,7 @@ class ReflectionsEntry:
                  ):
         self.entry_id = entry_id
         self.student_info = student_info
-        self.judges_scores = []
+        self.judges_scores: List[ReflectionsJudgeScore] = []
         for j in judges_scores:
             self.add_judge_score(j)
         self.judges_score_dict: Dict[str, ReflectionsJudgeScore] = {x.judge.judge_name:x.unweighted_score for x in judges_scores}
@@ -96,22 +99,33 @@ class ReflectionsEntry:
 
 
 class ReflectionsResult:
-    def __init__(self, entry: ReflectionsEntry, ignore_coi: bool, min_num_judges_per_entry:int):
+    def __init__(self, entry: ReflectionsEntry, ignore_coi: bool, min_num_judges_per_entry:int, all_judges: List[ReflectionsJudge]):
         # retain the last judge scoring entry from csv only
+        self.judges_yet_to_complete = []
         self.entry = entry
         self.judges_scores = entry.judges_scores
         self.ignore_coi = ignore_coi
         self.min_num_judges_per_entry = min_num_judges_per_entry
-        self.scoring_complete: bool = self.scoring_complete_for_entry()
+        self.scoring_complete: bool = self.access_if_scoring_is_complete(all_judges)
         self.num_judges = len(self.judges_scores)
         self.weighted_avg_score = self.get_weighted_sum_of_scores()/self.num_judges
         self.unweighted_avg_score = self.get_unweighted_sum_of_scores()/self.num_judges
         self.max_formula_score = self.get_max_formula_sum_of_scores()/self.num_judges
 
-    def scoring_complete_for_entry(self):
+    def access_if_scoring_is_complete(self, all_judges: List[ReflectionsJudge]):
         # Atleast one expert judge has scored. Make sure the judge has not marked it as a COI if we care about COIs.
         expert_looked_at_it = any([judge_score.judge.is_expert and (self.ignore_coi or not judge_score.is_coi) for judge_score in self.judges_scores])
+        if not expert_looked_at_it:
+            expected_expert = [j for j in all_judges if j.expertise_in_category == self.entry.category]
+            if not expected_expert:
+                self.judges_yet_to_complete.extend(expected_expert or ["need_expert"])
         sufficient_judges = len(self.judges_scores) >= self.min_num_judges_per_entry
+        if not sufficient_judges:
+            # get more general judges
+            num_short = self.min_num_judges_per_entry - len(self.judges_scores)
+            remind_these_general_judges = [x for x in all_judges if x.expertise_in_category=="" and x.judge_name not in self.entry.judges_score_dict]
+            # not sure which of the list of general judges who didn't evaluate to remind so list everything.
+            self.judges_yet_to_complete.extend(remind_these_general_judges or ["need_general"])
         return expert_looked_at_it and sufficient_judges
 
     def get_max_formula_sum_of_scores(self):
@@ -131,12 +145,18 @@ class ReflectionsResult:
     @classmethod
     def mk_pretty_table(cls, result_list: List["ReflectionsResult"]) -> PrettyTable:
         p = PrettyTable()
-        p.field_names = ["evaluation completed", "student name", "points_weighted", "points_unweighted", "points_max_formula", "grade", "list of scores", "student info"]
+        p.field_names = ["entry id", "evaluation completed", "category", "remind these judges", "list of scores", "student name", "points_weighted", "points_unweighted", "points_max_formula", "grade", "student info"]
         for result in result_list:
-            p.add_row([result.scoring_complete, result.entry.student_info.get_formal_abbreviated_name(), result.weighted_avg_score, result.unweighted_avg_score, result.max_formula_score, result.entry.student_info.grade, result.entry.judges_scores, result.entry.student_info.__repr__()])
+            remind_judges = result.judges_yet_to_complete
+            p.add_row([result.entry.entry_id, result.scoring_complete, result.entry.category, remind_judges or "", result.entry.judges_scores, result.entry.student_info.get_formal_abbreviated_name(), result.weighted_avg_score, result.unweighted_avg_score, result.max_formula_score, result.entry.student_info.grade, result.entry.student_info.__repr__()])
         p.reversesort = True
         p.sortby = "points_max_formula"
+        p.sort_key = lambda x: float(x[0])
         p.align['student info'] = 'l'
+        p.align['remind these judges'] = 'l'
+        p.align['list of scores'] = 'l'
+        p.align['student name'] = 'l'
+        p.float_format = "4.2"
         return p
 
 def create_entries(judges_scores_fp: str, judges_expertise: Dict[str, str]) -> List[ReflectionsEntry]:
@@ -185,16 +205,17 @@ def create_report_for_judges(reflections_entries, judges_expertise, reveal_score
     for entry_id in entry_ids:
         entry = entry_dict[entry_id]
         judges_completed = ['x' if n not in entry.judges_score_dict else (entry.judges_score_dict[n].unweighted_score if reveal_score else u'\u2713') for n in names_of_judges]
-        p.add_row([entry_id, entry.category, *judges_completed, entry.urls])
+        p.add_row([entry_id, entry.category, *judges_completed, entry.urls.replace("\n",", ")])
     return p
 
 
 def main(judges_scores_fp: str, judges_expertise: Dict[str, str], ignore_coi: bool, min_num_judges_per_entry:int, reveal_score_in_report: bool) -> (PrettyTable, PrettyTable):
     judges_expertise = {k.lower(): v for k, v in judges_expertise.items()}
+    judges_all_objs = [ReflectionsJudge(judge_name=j_name, expertise_in_category=j_expertise) for j_name, j_expertise in judges_expertise.items()]
     assert os.path.exists(judges_scores_fp), f"Check judges scores file path: {judges_scores_fp}"
     reflections_entries = create_entries(judges_scores_fp=judges_scores_fp, judges_expertise=judges_expertise)
     entries_report: PrettyTable = create_report_for_judges(reflections_entries=reflections_entries, judges_expertise= judges_expertise, reveal_score=reveal_score_in_report)
-    reflections_results = [ReflectionsResult(entry=entry, ignore_coi=ignore_coi, min_num_judges_per_entry=min_num_judges_per_entry) for entry in reflections_entries]
+    reflections_results = [ReflectionsResult(entry=entry, ignore_coi=ignore_coi, min_num_judges_per_entry=min_num_judges_per_entry, all_judges=judges_all_objs) for entry in reflections_entries]
     return ReflectionsResult.mk_pretty_table(reflections_results), entries_report
 
 

@@ -36,7 +36,7 @@ def main():
         ignore_coi = st.checkbox('ignore conflict of interest?')
         reveal_score_in_report = st.checkbox('reveal score in judge completion report?')
         judges_expertise= json.loads(st.text_area('Enter judge and expertise in json format', json.dumps(sample_judges_expertise)))
-        st.json(judges_expertise)
+        # st.json(judges_expertise)
 
         uploaded_judges_scoring_fp = os.path.join(temp_dir, f"judge_scores.csv")
         st.write("Hint: for judges scoring file csv download: https://docs.google.com/spreadsheets/d/1ZsCDH9OzNoAC4qagBwkpZdnDaKYOtBxFMR1hzbX_HYI/edit#gid=0")
