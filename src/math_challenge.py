@@ -72,7 +72,7 @@ class Challenge:
         sd: Dict[StudentInfo, List["Challenge"]] = {}
         with open(fp) as f_handle:
             for d in csv.DictReader(f_handle):
-                student = StudentInfo(f_name=d['Student first name'], l_name=d['Student last name'], teacher=d["Teacher's name"], grade=d['Grade'], email=d['Username'])
+                student = StudentInfo(f_name=d['Student first name'], l_name=d['Student last name'], teacher=d["Teacher's name"], grade=d['Grade'], email=d['Username'] if "Username" in d else d["Email address"])
                 challenge_nm = d['Math Challenge name']
                 correct_answers = [d[f"Question {x}"] for x in range(1, 19)]
                 challenge = Challenge(student=student, answers=correct_answers, challenge_name=challenge_nm, is_student_resp=True)
