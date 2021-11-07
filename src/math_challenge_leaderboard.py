@@ -33,7 +33,6 @@ def main(correct_answers_fp, student_answers_fp, diagnostics_for_mc_challenge: s
             diagnostics=[]
             for judgment, pred in zip(challenge_result[0], challenge_result[1]):
                 diagnostics.append(f'{pred}: {judgment}')
-                # diagnostics.append(f"{student_info}\t{tab.join([f'{x[1]}: {x[0]}' for x in challenge_result])}")
             dp.add_row([student_info, *diagnostics])
 
 
