@@ -30,7 +30,7 @@ class Challenge:
         self.answers: List[int] = []
         self.student = student
         for a in answers:
-            if split_ans_on in a:
+            if a and split_ans_on in a:
                 a_s = [self.preprocess_ans(x) for x in a.split(split_ans_on)]
                 self.answers.append(a_s)
             else:
@@ -41,11 +41,12 @@ class Challenge:
         ans = ""
         # answer is 25 ducklings
         # output = 25
-        for ch in a:
-            if ord('0') <= ord(ch) <= ord('9'):
-                ans += ch
-        if not ans and len(a) > 0:
-            print(f"Check for preprocessing answer: input = {a}, output = {ans}")
+        if a:
+            for ch in a:
+                if ord('0') <= ord(ch) <= ord('9'):
+                    ans += ch
+            if not ans and len(a) > 0:
+                print(f"Check for preprocessing answer: input = {a}, output = {ans}")
         return int(ans) if ans else DEFAULT_EMPTY_ANS
 
     def __repr__(self):

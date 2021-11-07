@@ -2,7 +2,7 @@
 # list of student answers : read from csv,  make a challenge class (correct_ans, challenge_name); make a challengeResponse (student_ans) and pre-process;; ((make a list of challenge that holds all challenges))
 # list of correct answers : read from csv
 # give pass/fail and score based on grade : create result object and compare a1, a2 and maintain a grade wise map
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from prettytable import PrettyTable
 
@@ -11,13 +11,27 @@ from src.math_challenge_result import MathChallengeResult
 from src.student_info import StudentInfo
 
 
-def main(correct_answers_fp, student_answers_fp) -> PrettyTable:
+def main(correct_answers_fp, student_answers_fp, diagnostics_for_mc_challenge: str) -> (PrettyTable, PrettyTable):
+    diagnostics_for_mc_challenge = diagnostics_for_mc_challenge.upper().strip()  # mc2 -> MC2
     correct_challenges_dict = Challenge.load_gold_answers(fp=correct_answers_fp)
     student_challenges_list_dict = Challenge.load_student_answers(fp=student_answers_fp)
-    student_scores = MathChallengeResult.compute_student_scores(correct_challenges_dict=correct_challenges_dict,
-                                                                student_list_challenges_dict=student_challenges_list_dict)
-    leaderboard: List[Tuple[StudentInfo, List[
-        "MathChallengeResult"]]] = MathChallengeResult.create_leaderboard(student_scores=student_scores)
+    student_scores = MathChallengeResult.compute_student_scores(correct_challenges_dict=correct_challenges_dict, student_list_challenges_dict=student_challenges_list_dict)
+    leaderboard: List[Tuple[StudentInfo, List["MathChallengeResult"]]] = MathChallengeResult.create_leaderboard(student_scores=student_scores)
+
+
+    diagnostics = ["", *correct_challenges_dict[diagnostics_for_mc_challenge].answers]
+    tab = '\t'
+    dp = PrettyTable()
+    dp.field_names = ["student name", *[f"ans.{(x+1)}" for x in range(18)]]
+    dp.align['student name'] = 'l'
+    for student_entry in leaderboard:
+        student_info = student_entry[0]
+        challenge_result = [x.diagnostics for x in student_entry[1] if x.challenge_name == diagnostics_for_mc_challenge]
+        challenge_result = challenge_result[0] if len(challenge_result) == 1 else None
+        if challenge_result:
+            diagnostics.append(f"{student_info}\t{tab.join(challenge_result)}")
+            dp.add_row([student_info, *challenge_result])
+
 
     print(f"\n\nLeaderboard")
     p = PrettyTable()
@@ -30,8 +44,10 @@ def main(correct_answers_fp, student_answers_fp) -> PrettyTable:
     p.sortby = "ignore_this_minus_points"
     p.align['student info'] = 'l'
     print(p)
-    return p
+    print("\n")
+    print(dp)
+    return p, dp
 
 
 if __name__ == '__main__':
-    main(correct_answers_fp="data/correct_answers.csv", student_answers_fp="data/student_answers.csv")
+    main(correct_answers_fp="data/uploaded/correct_answers.csv", student_answers_fp="data/uploaded/student-answers-withduplicates.csv", diagnostics_for_mc_challenge="MC2")

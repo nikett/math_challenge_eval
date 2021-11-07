@@ -10,6 +10,8 @@ class MathChallengeResult:
         self.passed: bool = False
         self.num_correct: int = 0
         self.num_wrong: int = 0
+        self.diagnostics: List[str] = []
+        self.challenge_name = ""
 
     @classmethod
     def result(cls, student_ans: Challenge, correct_ans: Challenge) -> "MathChallengeResult":
@@ -19,20 +21,26 @@ class MathChallengeResult:
         assert student_ans.challenge_name == correct_ans.challenge_name, f"Student challenge and correct challenge names mismatch, cannot compare:\nstudent response: {student_ans}\ncorrect response: {correct_ans}.\n"
 
         r = MathChallengeResult()
+
         for sa, ca in zip(student_ans.answers, correct_ans.answers):
             # sometimes there can be multiple answers
             if isinstance(ca, list):
                 if sa in ca:
                     r.num_correct += 1
+                    r.diagnostics.append("1")
                 else:
                     r.num_wrong += 1
+                    r.diagnostics.append("0")
             else:
                 if sa == ca:
                     r.num_correct += 1
+                    r.diagnostics.append("1")
                 else:
                     r.num_wrong += 1
+                    r.diagnostics.append("0")
 
         r.passed = r.passed_as_per_grade(num_correct=r.num_correct, grade=student_ans.student.grade)
+        r.challenge_name = student_ans.challenge_name
         return r
 
     @classmethod
