@@ -7,7 +7,6 @@ from prettytable import PrettyTable
 from src.student_info import StudentInfo
 
 # todo in the future: fix bug in forms.html -- missing art title
-# todo add _OR_ in answers of math challenge when answers are a list.
 
 class ReflectionsJudge:
     def __init__(self, judge_name: str, expertise_in_category: str):
@@ -38,12 +37,24 @@ class ReflectionsJudgeScore:
         self.confidence = csv_entry_dict['confidence']  # Sort of confident, Not confident, Very confident
         self.entry_category = csv_entry_dict['entry_category']
         self.unweighted_score = self.compute_total_score()
-        self.weighted_score = self.compute_weighted_score()
+        # self.weighted_score = self.compute_weighted_score()
+        self.weighted_score_v2 = self.compute_weighted_score_v2()
+        self.weighted_by_confidence_score = self.compute_weighted_by_confidence_score()
 
     def compute_total_score(self):
         return self.interpretation + self.creativity + self.technique
 
-    def compute_weighted_score(self):
+    def compute_weighted_by_confidence_score(self):
+        wt = 0.0
+        if self.confidence == "Sort of confident":
+            wt = 0.66
+        elif self.confidence == "Very confident":
+            wt = 1.0
+        elif self.confidence == "Not confident":
+            wt = 0.33
+        return wt * self.unweighted_score
+
+    def compute_weighted_score_v2(self):
         wt = 0.0
         if self.confidence == "Sort of confident":
             wt = 0.66
@@ -52,12 +63,26 @@ class ReflectionsJudgeScore:
         elif self.confidence == "Not confident":
             wt = 0.33
 
-        if self.judge.expertise_in_category == self.entry_category:
-            wt = 2.0 * wt
+        if self.judge.expertise_in_category.lower() != self.entry_category.lower():
+            wt = 0.5 * wt
         return wt * self.unweighted_score
 
+    # def compute_weighted_score(self):
+    #     wt = 0.0
+    #     if self.confidence == "Sort of confident":
+    #         wt = 0.66
+    #     elif self.confidence == "Very confident":
+    #         wt = 1.0
+    #     elif self.confidence == "Not confident":
+    #         wt = 0.33
+    #
+    #     if self.judge.expertise_in_category == self.entry_category:
+    #         wt = 2.0 * wt
+    #     return wt * self.unweighted_score
+
     def __repr__(self):
-        return f"{self.judge.judge_name}: {self.unweighted_score}"
+        confidence_red_alert = f"{self.confidence}" if self.confidence!="Very confident" else ""
+        return f"{self.judge.judge_name}: {self.unweighted_score} {confidence_red_alert}"
 
 class ReflectionsEntry:
     def __init__(self,
@@ -110,7 +135,9 @@ class ReflectionsResult:
         self.num_judges = len(self.judges_scores)
         self.weighted_avg_score = self.get_weighted_sum_of_scores()/self.num_judges
         self.unweighted_avg_score = self.get_unweighted_sum_of_scores()/self.num_judges
-        self.max_formula_score = self.get_max_formula_sum_of_scores()/self.num_judges
+        self.weighted_by_confidence_avg_score = self.get_weighted_by_confidence_sum_of_scores()/self.num_judges
+        # self.max_formula_score = self.get_max_formula_sum_of_scores()
+        self.max_formula_v2_score = self.get_max_formula_v2_avg_of_scores()
 
     def access_if_scoring_is_complete(self, all_judges: List[ReflectionsJudge]):
         # Atleast one expert judge has scored. Make sure the judge has not marked it as a COI if we care about COIs.
@@ -127,16 +154,26 @@ class ReflectionsResult:
             self.judges_yet_to_complete.extend(remind_these_general_judges or ["need_general"])
         return expert_looked_at_it and sufficient_judges
 
-    def get_max_formula_sum_of_scores(self):
+    # def get_max_formula_sum_of_scores(self):
+    #     non_expert_scores = [judge_score for judge_score in self.judges_scores if not judge_score.judge.is_expert]
+    #     expert_scores = [judge_score for judge_score in self.judges_scores if judge_score.judge.is_expert]
+    #     total_relevant_judges = len(expert_scores) + 1  # only 1 non-expert is considered
+    #     return (max([x.weighted_score for x in non_expert_scores]) + sum([x.weighted_score for x in expert_scores]))/ total_relevant_judges
+
+    def get_max_formula_v2_avg_of_scores(self):
         non_expert_scores = [judge_score for judge_score in self.judges_scores if not judge_score.judge.is_expert]
         expert_scores = [judge_score for judge_score in self.judges_scores if judge_score.judge.is_expert]
-        return max([x.weighted_score for x in non_expert_scores]) + sum([x.weighted_score for x in expert_scores])
+        total_relevant_judges = len(expert_scores) + 1  # only 1 non-expert is considered
+        return (max([x.weighted_score_v2 for x in non_expert_scores]) + sum([x.weighted_score_v2 for x in expert_scores]))/total_relevant_judges
 
     def get_weighted_sum_of_scores(self):
-        return sum([x.weighted_score for x in self.judges_scores])
+        return sum([x.weighted_score_v2 for x in self.judges_scores])
 
     def get_unweighted_sum_of_scores(self):
         return sum([x.unweighted_score for x in self.judges_scores])
+
+    def get_weighted_by_confidence_sum_of_scores(self):
+        return sum([x.weighted_by_confidence_score for x in self.judges_scores])
 
     def __repr__(self):
         return f"scoring complete = {self.scoring_complete}, weighted score = {self.weighted_avg_score}, unweighted_score={self.unweighted_avg_score}, dict of scores = {self.judges_scores}"
@@ -144,10 +181,10 @@ class ReflectionsResult:
     @classmethod
     def mk_pretty_table(cls, result_list: List["ReflectionsResult"]) -> PrettyTable:
         p = PrettyTable()
-        p.field_names = ["entry id", "evaluation completed", "category", "remind these judges", "list of scores", "student name", "points_weighted", "points_unweighted", "points_max_formula", "grade", "student info"]
+        p.field_names = ["entry id", "evaluation completed", "category", "remind these judges", "list of scores", "student name", "points_weighted_by_confidence", "points_weighted_by_expertise_and_confidence", "points_unweighted", "points_max_formula", "grade", "student info"]
         for result in result_list:
             remind_judges = result.judges_yet_to_complete
-            p.add_row([result.entry.entry_id, result.scoring_complete, result.entry.category, remind_judges or "", result.entry.judges_scores, result.entry.student_info.get_formal_abbreviated_name(), result.weighted_avg_score, result.unweighted_avg_score, result.max_formula_score, result.entry.student_info.grade, result.entry.student_info.__repr__()])
+            p.add_row([result.entry.entry_id, result.scoring_complete, result.entry.category, remind_judges or "", result.entry.judges_scores, result.entry.student_info.get_formal_abbreviated_name(), result.weighted_by_confidence_avg_score, result.weighted_avg_score, result.unweighted_avg_score, result.max_formula_v2_score, result.entry.student_info.grade, result.entry.student_info.__repr__()])
         p.reversesort = True
         p.sortby = "points_max_formula"
         p.sort_key = lambda x: float(x[0])
