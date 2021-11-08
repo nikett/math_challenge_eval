@@ -56,8 +56,13 @@ def main():
             with open(output_path, 'w') as outfile:
                 outfile.write(f"{results}")
 
+            st.write(f"\nSee details of these ids at: https://docs.google.com/spreadsheets/d/1mRHPLXsvQI_TGLOOrnmO2m9ieQobasoIleBoFyl7ET0/edit#gid=0 \n")
+
             st.write(f"\n\n{'*'*80}\n\n Report:")
             st.write(to_markdown_table(report))
+
+
+
 
 
 if __name__ == '__main__':

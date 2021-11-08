@@ -168,7 +168,7 @@ class ReflectionsResult:
         return (max([x.weighted_score_v2 for x in non_expert_scores]) + sum([x.weighted_score_v2 for x in expert_scores]))/total_relevant_judges
 
     # accounts for missing non-expert reviews or low-confidence only non-expert review and high confidence expert review
-    def get_max_formula_v3_avg_of_scores(self, HIGH_CONF_THRESHOLD=89):
+    def get_max_formula_v3_avg_of_scores(self, HIGH_CONF_THRESHOLD=84):
         non_expert_scores = [judge_score for judge_score in self.judges_scores if not judge_score.judge.is_expert]
         expert_scores = [judge_score for judge_score in self.judges_scores if judge_score.judge.is_expert]
         has_singleton_not_confidenct_non_expert = False
@@ -206,10 +206,10 @@ class ReflectionsResult:
     @classmethod
     def mk_pretty_table(cls, result_list: List["ReflectionsResult"]) -> PrettyTable:
         p = PrettyTable()
-        p.field_names = ["entry id", "evaluation completed", "category", "remind these judges", "list of scores", "student name", "points_weighted_by_confidence", "points_weighted_by_expertise_and_confidence", "points_unweighted", "points_max_formula","points_max_formula_addresses_singleton_non_expert", "grade", "student info"]
+        p.field_names = ["entry id", "evaluation completed", "category", "remind these judges", "list of scores", "student name", "points_weighted_by_confidence", "points_weighted_by_expertise_and_confidence", "points_unweighted", "points_max_formula","points_max_formula_addresses_singleton_non_expert", "grade", "student info", "entry statement", "entry info urls", "entry email"]
         for result in result_list:
             remind_judges = result.judges_yet_to_complete
-            p.add_row([result.entry.entry_id, result.scoring_complete, result.entry.category, remind_judges or "", result.entry.judges_scores, result.entry.student_info.get_formal_abbreviated_name(), result.weighted_by_confidence_avg_score, result.weighted_avg_score, result.unweighted_avg_score, result.max_formula_v2_score,result.max_formula_v3_score, result.entry.student_info.grade, result.entry.student_info.__repr__()])
+            p.add_row([result.entry.entry_id, result.scoring_complete, result.entry.category, remind_judges or "", result.entry.judges_scores, result.entry.student_info.get_formal_abbreviated_name(), result.weighted_by_confidence_avg_score, result.weighted_avg_score, result.unweighted_avg_score, result.max_formula_v2_score,result.max_formula_v3_score, result.entry.student_info.grade, result.entry.student_info.__repr__(), result.entry.statement, result.entry.urls.replace("\n",", "), result.entry.student_info.email])
         p.reversesort = True
         p.sortby = "points_max_formula_addresses_singleton_non_expert"
         p.sort_key = lambda x: float(x[0])
