@@ -168,18 +168,22 @@ class ReflectionsResult:
         return (max([x.weighted_score_v2 for x in non_expert_scores]) + sum([x.weighted_score_v2 for x in expert_scores]))/total_relevant_judges
 
     # accounts for missing non-expert reviews or low-confidence only non-expert review and high confidence expert review
-    def get_max_formula_v3_avg_of_scores(self):
+    def get_max_formula_v3_avg_of_scores(self, HIGH_CONF_THRESHOLD=89):
         non_expert_scores = [judge_score for judge_score in self.judges_scores if not judge_score.judge.is_expert]
         expert_scores = [judge_score for judge_score in self.judges_scores if judge_score.judge.is_expert]
         has_singleton_not_confidenct_non_expert = False
+        has_very_high_confidence_expert = sum([x.weighted_score_v2 for x in expert_scores])/len(expert_scores) >= HIGH_CONF_THRESHOLD if len(expert_scores)>=1 else False
         if len(non_expert_scores) == 1 and non_expert_scores[0].confidence!="Very confident":
             has_singleton_not_confidenct_non_expert = True
         if not has_singleton_not_confidenct_non_expert and len(expert_scores)>= 1:  # this is the usual case.
             total_relevant_judges = len(expert_scores) + 1  # only 1 non-expert is considered
             return (max([x.weighted_score_v2 for x in non_expert_scores]) + sum([x.weighted_score_v2 for x in expert_scores]))/total_relevant_judges
-        elif has_singleton_not_confidenct_non_expert and len(expert_scores) >= 1:  # this is the exception case that must account for missing non-expert or their low confidence. Focus on the expert's score
+        elif has_singleton_not_confidenct_non_expert and len(expert_scores) >= 1 and has_very_high_confidence_expert:  # this is the exception case that must account for missing non-expert or their low confidence. Focus on the expert's score
             total_relevant_judges = len(expert_scores) + 0  # 0 non-expert is considered
             return sum([x.weighted_score_v2 for x in expert_scores])/total_relevant_judges
+        elif has_singleton_not_confidenct_non_expert and len(expert_scores) >= 1 and not has_very_high_confidence_expert:  # this is the exception case that must account for missing non-expert or their low confidence. AND cannot focus on the expert's score
+            total_relevant_judges = len(expert_scores) + 1  # only 1 non-expert is considered
+            return (max([x.weighted_score_v2 for x in non_expert_scores]) + sum([x.weighted_score_v2 for x in expert_scores]))/total_relevant_judges
         elif has_singleton_not_confidenct_non_expert and len(expert_scores) == 0:
             # no expert score and not enough high confident non-expert scores
             print(f"Score max formula v3: Entry {self.entry.entry_id} requires atleast one expert to review!! For now considering non-expert's low confidence score: ({self.judges_scores})")
