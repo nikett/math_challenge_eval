@@ -13,8 +13,8 @@ from src.student_info import StudentInfo
 
 def main(correct_answers_fp, student_answers_fp, diagnostics_for_mc_challenge: str) -> (PrettyTable, PrettyTable):
     diagnostics_for_mc_challenge = diagnostics_for_mc_challenge.upper().strip()  # mc2 -> MC2
-    correct_challenges_dict = Challenge.load_gold_answers(fp=correct_answers_fp)
-    student_challenges_list_dict = Challenge.load_student_answers(fp=student_answers_fp)
+    correct_challenges_dict, challenge_wise_retaining = Challenge.load_gold_answers(fp=correct_answers_fp)
+    student_challenges_list_dict = Challenge.load_student_answers(fp=student_answers_fp, challenge_wise_retaining=challenge_wise_retaining)
     student_scores = MathChallengeResult.compute_student_scores(correct_challenges_dict=correct_challenges_dict, student_list_challenges_dict=student_challenges_list_dict)
     leaderboard: List[Tuple[StudentInfo, List["MathChallengeResult"]]] = MathChallengeResult.create_leaderboard(student_scores=student_scores)
 

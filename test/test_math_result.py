@@ -43,6 +43,16 @@ class TestChallenge(unittest.TestCase):
         r1.num_wrong = 4 - r1.num_correct
         self.assertEqual(MathChallengeResult.result(student_ans, gold_ans).__repr__(), r1.__repr__())
 
+    def test_score_text_ans(self):
+        top1_student = StudentInfo(f_name="Top1", l_name="Tandon", grade="First grade", teacher="Ms. Erica Garl", email="blah@blah.com")
+        student_ans = Challenge(student=top1_student, answers=["ans is 1", "2", "3", "4"], challenge_name="MC2", is_student_resp=True)
+        gold_ans = Challenge(student=None, answers=["1", "0 {blue} __OR__ 2 {grey}", "3", "4"], challenge_name="MC2", is_student_resp=False)
+        r1 = MathChallengeResult()
+        r1.passed = True
+        r1.num_correct = 4
+        r1.num_wrong = 4 - r1.num_correct
+        self.assertEqual(MathChallengeResult.result(student_ans, gold_ans).__repr__(), r1.__repr__())
+
     def test_create_leaderboard(self):
         r1 = MathChallengeResult()
         r1.passed = True
