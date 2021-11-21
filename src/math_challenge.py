@@ -64,6 +64,11 @@ class Challenge:
             replace_with= f"{t_id}"
             a = a.replace(replace_str, replace_with)
 
+        # 1st bag: 20, 2nd bag:14, 3rd bag: 8, 4th bag: 18
+        # Replace 1st with first
+        for k, v in {"1st": "first", "2nd": "second", "3rd": "third", "4th": "fourth", "5th": "fifth"}.items():
+            a = a.replace(k,v)
+
         if a:
             for ch in a:
                 if ord('0') <= ord(ch) <= ord('9'):
