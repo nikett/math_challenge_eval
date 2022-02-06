@@ -45,13 +45,15 @@ class Challenge:
                 text_retain_dict = list_of_text_retain_dict[a_id]
             if a and split_ans_on in a:
                 a_s = [self.preprocess_ans(a=x, text_retain_dict=text_retain_dict) for x in a.split(split_ans_on)]
-                self.answers.append(a_s)  # answers can be a list][int] or an int
+                self.answers.append(a_s)  # answers can be a list [int] or an int
             else:
                 self.answers.append(self.preprocess_ans(a=a, text_retain_dict=text_retain_dict))
 
     @classmethod
     def preprocess_ans(cls, a, text_retain_dict: Dict[str, int]={}) -> int:
         ans = ""
+        a = a.strip().lower()
+        a = a.split("=")[-1]
         # answer is 25 ducklings
         # output = 25
 
@@ -66,7 +68,7 @@ class Challenge:
 
         # 1st bag: 20, 2nd bag:14, 3rd bag: 8, 4th bag: 18
         # Replace 1st with first
-        for k, v in {"1st": "first", "2nd": "second", "3rd": "third", "4th": "fourth", "5th": "fifth"}.items():
+        for k, v in {"1st": "first", "2nd": "second", "3rd": "third", "4th": "fourth", "5th": "fifth", "6th": "sixth", "7th": "seventh", "8th": "seventh"}.items():
             a = a.replace(k,v)
 
         if a:
@@ -91,7 +93,7 @@ class Challenge:
                 correct_answers = [d[f"Question {x}"] for x in range(1, 19)]
                 list_of_text_retain_dict = []
                 for x in correct_answers:
-                    list_of_text_retain_dict.append({x:x_id for x_id, x in enumerate(re.findall(string=x, pattern=pattern_to_retain))})
+                    list_of_text_retain_dict.append({x:x_id+1 for x_id, x in enumerate(re.findall(string=x, pattern=pattern_to_retain))})
                     # text_retain_matches = re.findall(pattern=text_retain_regex, string=a) #  "\{(.*?)\}"
                 alls[challenge_nm] = Challenge(student=None,  # gold does not have a student name.
                                                answers=correct_answers,
