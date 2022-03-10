@@ -7,6 +7,7 @@ from src.student_info import StudentInfo
 
 class TestChallenge(unittest.TestCase):
     def test_preprocess(self):
+        self.assertEqual(Challenge.preprocess_ans("a. 37th floor, b. 42nd floor, c. 39th floor, d. 40th floor"), 37423940)
         self.assertEqual(Challenge.preprocess_ans("answer is 25 ducklings"), 25)
         self.assertEqual(Challenge.preprocess_ans("4 c.1"), 41)
         self.assertEqual(Challenge.preprocess_ans(a="abcd efgh. ij"), DEFAULT_EMPTY_ANS)
