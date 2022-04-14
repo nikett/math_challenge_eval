@@ -38,11 +38,11 @@ def main(correct_answers_fp, student_answers_fp, diagnostics_for_mc_challenge: s
 
     print(f"\n\nLeaderboard")
     p = PrettyTable()
-    p.field_names = ["student name", "points", "grade", "student info", "ignore_this_minus_points", 'successful submissions', 'num correct']
+    p.field_names = ["student name", "points", "grade", "email", "student info", "ignore_this_minus_points", 'successful submissions', 'num correct']
     for (student, list_results) in leaderboard:
         total_pass = MathChallengeResult.summarize(list_results)['total_num_passed']
         total_correct = MathChallengeResult.summarize(list_results)['total_num_correct']
-        p.add_row([student.get_formal_abbreviated_name(),  100* int(total_pass), student.grade, student.__repr__(), -100* int(total_pass), total_pass, total_correct])
+        p.add_row([student.get_formal_abbreviated_name(),  100* int(total_pass), student.grade, student.email, student.__repr__(), -100* int(total_pass), total_pass, total_correct])
     p.reversesort = False
     p.sortby = "ignore_this_minus_points"
     p.align['student info'] = 'l'
