@@ -2,12 +2,13 @@ from src.utils import abbreviate_lname
 
 
 class StudentInfo:
-    def __init__(self, f_name:str,l_name:str,grade:str,teacher:str,email:str):
+    def __init__(self, f_name:str,l_name:str,grade:str,teacher:str,email:str, school:str=None):
         self.email = email
         self.f_name = str.capitalize(f_name.lower().strip())
         self.l_name = str.capitalize(l_name.lower().strip())
         self.grade = grade
         self.teacher = str.capitalize(self.preprocess_teacher_name(teacher.strip()))
+        self.school=school # TODO
 
     @classmethod
     def preprocess_teacher_name(cls, tn):
@@ -25,6 +26,13 @@ class StudentInfo:
             return ptn_splits[-2]
         else:  # Erica G. -> g
             return ptn_splits[-1]
+
+    @classmethod
+    def preprocess_teacher_name_v2(cls, tn):
+        # First grade - Ms. Marv Hass
+        tn = tn.strip()
+        grade, tn = tn.split("-")
+        return grade, tn # TODO
 
     def get_formal_abbreviated_name(self):
         return f"{self.f_name} {abbreviate_lname(lname=self.l_name)}".strip()
