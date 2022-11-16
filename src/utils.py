@@ -29,13 +29,13 @@ def abbreviate_all(input_fp: str, output_fp: str):
 def ensure_path(fp: str, is_dir: bool):
     # Create parent level subdirectories if not exists.
     p = Path(fp)
-    if os.path.exists(fp):
+    if p.exists():
         return
     # if path indicates a dir: Create parent level subdirectories if not exists.
-    if not is_dir and not p.exists():
+    if not is_dir:
         p.parent.mkdir(parents=True, exist_ok=True)
     # if path indicates a file: Create parent level subdirectories if not exists
-    elif not p.exists() and is_dir:
+    elif is_dir:
         p.mkdir(parents=True, exist_ok=True)
 
 

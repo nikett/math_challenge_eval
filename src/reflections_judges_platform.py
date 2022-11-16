@@ -84,6 +84,16 @@ body {
     return f"{head}\n\n{body}\n\n{tail}"
 
 
+def iframe_url(x: str):
+    x = x.replace("/view?usp=share_link", "/preview").replace("/view?usp=drivesdk", "/preview").replace("/view","/preview")
+    x = x.replace("https://drive.google.com/open?id=", "https://drive.google.com/file/d/") \
+        .replace("/view","/preview")
+    if not x.endswith("/preview"):
+        x += "/preview"
+    return x
+
+
+
 def img_and_other_elems(file_types, urls):
     arr = []
     # <img src=url width="500" height="600">
@@ -93,20 +103,38 @@ def img_and_other_elems(file_types, urls):
             # perhaps: create thumbnail from url (because original art does not load)
             # https://drive.google.com/file/d/14hz3ySPn-zB
             # https://drive.google.com/thumbnail?id=14hz3ySPn-zB
-            url_thumbnail = url.replace("https://drive.google.com/file/d/", "https://drive.google.com/thumbnail?id=")
-            url_thumbnail = url_thumbnail.replace("https://drive.google.com/open?", "https://drive.google.com/thumbnail?")
+            # https://drive.google.com/thumbnail?id=1v-5TIU0_NXb6LVrdLvXCFJxFCoOjzjo7
+
+            # This used to work till 2021 but now thumbnail are stored under lh3
+            # url_thumbnail = url.replace("https://drive.google.com/file/d/", "https://drive.google.com/thumbnail?id=")
+            # url_thumbnail = url_thumbnail.replace("https://drive.google.com/open?", "https://drive.google.com/thumbnail?")
+            # https://drive.google.com/file/d/1WOdQZQ18xhBK8q8ZplJ2jHIpRPlEUN4l/view
+            # https://drive.google.com/open?id=1WOdQZQ18xhBK8q8ZplJ2jHIpRPlEUN4l
+
+            url_thumbnail = url.replace("https://drive.google.com/open?id=", "https://drive.google.com/file/d/")
+            url_thumbnail = url_thumbnail.replace("https://drive.google.com/file/d/", "https://lh3.googleusercontent.com/d/")
+            url_thumbnail = url_thumbnail.replace("/view", "/preview")
             arr.append(f'<img src="{url_thumbnail}" width="500" height="600">')
             arr.append(f'<a href="{url}" target="_blank">Original image high resolution</a>')
         elif file_type == "mp3":
-            arr.append(f'<audio controls>\n<source src="{url}" type="audio/mpeg">\n</audio>')
-            arr.append(f'<a href={url}>Original audio link</a>')
+            url_mp3 = iframe_url(url)
+            arr.append(f'<iframe src="{url_mp3}" frameborder="1" width="640" height="480"></iframe>')
+            arr.append(f'<a href={url_mp3}>Original audio link</a>')
         elif file_type == "mp4":
-            arr.append(f'<video controls>\n<source src="{url}" type="video/mp4">\n</video>')
-            arr.append(f'<a href={url}>Original video link</a>')
+            url_mp4 = iframe_url(url)
+            arr.append(f'<iframe src="{url_mp4}" frameborder="1" width="640" height="480"></iframe>')
+            arr.append(f'<a href={url_mp4}>Original video link</a>')
         elif file_type == "pdf":
-            arr.append(f'<a href={url}>Original PDF link</a>')
+            # https://drive.google.com/open?id=1ySyK_mZ97BafYSGHzAtNKvxe9c8p28XI
+            # https://drive.google.com/file/d/1ySyK_mZ97BafYSGHzAtNKvxe9c8p28XI/view
+            # https://drive.google.com/file/d/1aGh69Sm5bta5U63Iu-EaxV1mWn9iyvPT/edit
+            url_pdf = iframe_url(url)
+            arr.append(f'<iframe src="{url_pdf}" frameborder="1" width="640" height="480"></iframe>')
+            # arr.append(f'<a href={url}>Original PDF link</a>')
         elif file_type == "docx":
-            arr.append(f'<a href={url}>Original docx link</a>')
+            url_docx = iframe_url(url)
+            arr.append(f'<iframe src="{url_docx}" frameborder="1" width="640" height="480"></iframe>')
+            arr.append(f'<a href={url_docx}>Original docx link</a>')
         else:
             arr.append(f'<a href="{url}" target="_blank">Original link (file type: {file_type})</a>')
 
@@ -178,7 +206,7 @@ def fill_form_template(form_action: str, data: Dict[str, Any]):
 <div align="center">
     <h2><b>Scoring form for Judges</b></h2>
 
-    <h3><b><i>2021-22 theme: “I Will Change The World By...” </i></b></h3>
+    <h3><b><i>2022-23 theme: “Show your voice...” </i></b></h3>
     <br>
 
     <div align="left">
@@ -187,7 +215,7 @@ def fill_form_template(form_action: str, data: Dict[str, Any]):
     2. Creativity (30 pts.)<br>
     3. Technique (30 pts.)<br>
 
-    2021-22 Judges guide is <a href="https://www.wastatepta.org/wp-content/uploads/2021/08/21-22-Judges-guide.pdf"
+    2022-23 Judges guide is <a href="https://drive.google.com/file/d/1E0BydGTOqaN2mR1t4kx5N4cW9RHpFO6a/view"
                                style="color: #0000FF">here</a>
     </div>
 
@@ -377,7 +405,17 @@ def fill_form_template(form_action: str, data: Dict[str, Any]):
 </html>
 '''
 
+def alternate_dict_keys(d, alt_keys):
+    for a in alt_keys:
+        if a in d:
+            return d[a]
+    return ""
 
+
+# TODO update these dict keys (e.g, timestamp can be missing).
+# Timestamp	Email Address	Student first name	Student last name	Grade	Teacher's  name	Upload entry form with file name as (firstname.lastname.grade.pdf) 	                    Arts Category	Grade division	Upload entry file	                                                    Are the file names you are uploading like so  (firstname.lastname.grade.pdf) ?	Does your artwork follow the submission guidelines (size/format etc.)?	Title of artwork	Are you submitting again with updates?	Artist's statement	Artwork details
+# 	        Email Address	Student first name	Student last name	Grade	Teacher's  name	"entry form - google drive link with file name as (form.firstname.lastname.grade.pdf)" 	Arts Category	Grade division	"Upload entry file with file name as (firstname.lastname.grade)"			                                                                                                                                                        Title of artwork		                                    Artist statement	Artwork details
+# TODO ensure school name where it is hosted.
 def rename_dict_keys(d):
     # GIVEN:
     # Timestamp,Email Address,Student first name,Student last name,Grade,Teacher's  name,
@@ -392,17 +430,19 @@ def rename_dict_keys(d):
     # entry_id, entry_category, entry_statement, entry_urls, entry_student_first_name,
     # entry_student_last_name, entry_student_teacher_name, entry_parent_email_id, entry_file_types
     d["entry_id"] = d["id"]
-    d["entry_category"] = d["Select the art category for submission"]
-    d["entry_statement"] = d["Artist's statement"]
-    d["entry_urls"] = d["Upload entry file"]
+    d["entry_category"] = alternate_dict_keys(d=d, alt_keys=["Select the art category for submission", "Arts Category"])
+    d["entry_statement"] = alternate_dict_keys(d=d, alt_keys=["Artist's statement" ,"Artist statement"])
+    d["entry_urls"] = alternate_dict_keys(d=d, alt_keys=["Upload entry file" , "Upload entry file with file name as (firstname.lastname.grade)"])
     d["entry_student_first_name"] = d["Student first name"]
     d["entry_student_last_name"] = d["Student last name"]
     d["entry_student_teacher_name"] = d["Teacher's  name"]
     d["entry_grade"] = d["Grade"]
+    d["entry_grade_division"] = d["Grade division"]
     d["entry_parent_email_id"] = d["Email Address"]
-    d["entry_file_types"] = d["file_type"]
+    d["entry_file_types"] = d.get("file_type", "")   # TODO check file type
+    # TODO add special arts category?
     d["entry_title"] = d["Title of artwork"]
-    d["entry_is_valid"] = d["is_valid_final_entry"]
+    d["entry_is_valid"] = d.get("is_valid_final_entry", "")
     return d
 
 
@@ -462,9 +502,26 @@ def main(data_entries_fp: str, out_dir: str, judges: List[str], website_base_add
                        form_action=form_action)
 
 if __name__ == '__main__':
-    main(data_entries_fp= "data/judges_input/real-judges-data.csv",
+    # for 2021-22 (Discovery)
+    # main(data_entries_fp= "data/judges_input/real-judges-data.csv",
+    #      out_dir= "data/forms",
+    #      judges =["Dhivya", "Shweta", "Thom", "Trisha", "Whitney"],
+    #      website_base_addr = "https://shrikrishnajewels.com/reflections",
+    #      form_action="https://script.google.com/macros/s/AKfycbyi-42Psz_6118nWOeQNqSL_nXu4VejtnWVtuzH1U5P92w8IZTEXGKdtbmtXyi53ZJR8w/exec"
+    #      )
+
+    # for 2022-23 (Challenger)
+    # main(data_entries_fp= "/private/tmp/reflections.sheet1.csv",
+    #      out_dir= "data/forms",
+    #      judges =["Ryan Eronemo", "Larisa Eronemo", "Sabah Najam","Heidi Bennick", "Kim Blanchard"],
+    #      website_base_addr = "https://anjali.tandon.info/schools/reflections_challenger",
+    #      form_action="https://script.google.com/macros/s/AKfycbxUWRtQFUmzUb5RlX5dp9pzFyl2vMPfjZkZC-KX1eNE3HqeiPa3bZiWOP5YWun8ZpXT/exec"
+    #      )
+
+    # for 2022-23 (Discovery)
+    main(data_entries_fp= "/Users/nikett/Desktop/reflections.discovery.2022.csv",
          out_dir= "data/forms",
          judges =["Dhivya", "Shweta", "Thom", "Trisha", "Whitney"],
-         website_base_addr = "https://shrikrishnajewels.com/reflections",
-         form_action="https://script.google.com/macros/s/AKfycbyi-42Psz_6118nWOeQNqSL_nXu4VejtnWVtuzH1U5P92w8IZTEXGKdtbmtXyi53ZJR8w/exec"
+         website_base_addr = "https://anjali.tandon.info/schools/reflections_discovery",
+         form_action="https://script.google.com/macros/s/AKfycbyjb-sQNrv-wq0s-6Cv8HN3Z0IErmcL_4YiymPQnfpqgRN8FqXJUHAE7492NABX6QW0rg/exec"
          )
